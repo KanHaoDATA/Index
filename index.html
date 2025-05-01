@@ -1,169 +1,155 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đoán Tài/Xỉu Ngẫu Nhiên</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-image: url('https://i.imgur.com/dZp5DMx.jpg');
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        .overlay {
-            background-color: rgba(0, 0, 0, 0.6);
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        .content {
-            position: relative;
-            z-index: 1;
-            padding-top: 40px;
-        }
-        .circle-container {
-            display: flex;
-            justify-content: center;
-            gap: 50px;
-            margin: 20px 0;
-        }
-        .circle {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            border: 2px solid white;
-            transition: 0.3s;
-        }
-        .active {
-            animation: blink 1s infinite;
-            background-color: gold;
-            color: black;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        textarea {
-            width: 80%;
-            height: 80px;
-            margin: 20px 0;
-            font-size: 16px;
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            resize: none;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
-            cursor: pointer;
-            background-color: #ff6699;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            transition: 0.3s;
-        }
-        button:hover {
-            background-color: #ff3366;
-        }
-        .result {
-            margin-top: 20px;
-            font-size: 20px;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dự đoán Tài/Xỉu</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        @media screen and (max-width: 600px) {
-            .circle-container {
-                flex-direction: column;
-                gap: 20px;
-            }
-            .circle {
-                width: 120px;
-                height: 120px;
-                font-size: 20px;
-            }
-            textarea {
-                width: 95%;
-            }
-        }
-    </style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+      background-color: #1e1e1e;
+      border-radius: 16px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      background-color: #2a2a2a;
+      color: #fff;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #00c853;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00e676;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .box-wrapper {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+    }
+
+    .box {
+      width: 130px;
+      height: 130px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #1a1a1a, #262626);
+      box-shadow: 5px 5px 15px #0d0d0d, -5px -5px 15px #2e2e2e;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .box:hover {
+      transform: scale(1.05);
+    }
+
+    .box span.label {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .box span.percent {
+      font-size: 26px;
+      font-weight: bold;
+      color: #00e5ff;
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h2>Dự đoán Tài/Xỉu</h2>
+    <input type="text" id="md5Input" placeholder="Nhập chuỗi MD5 tại đây">
+    <button onclick="predict()">Dự đoán</button>
+    <div id="result"></div>
 
-<div class="overlay"></div>
-
-<div class="content">
-    <h2>Đoán nhanh Tài / Xỉu</h2>
-
-    <textarea id="inputCode" placeholder="Nhập mã ở đây..."></textarea><br>
-
-    <div class="circle-container">
-        <div id="taiCircle" class="circle">Tài</div>
-        <div id="xiuCircle" class="circle">Xỉu</div>
+    <div class="box-wrapper">
+      <div class="box">
+        <span class="label">Tài</span>
+        <span class="percent" id="percentTai"></span>
+      </div>
+      <div class="box">
+        <span class="label">Xỉu</span>
+        <span class="percent" id="percentXiu"></span>
+      </div>
     </div>
+  </div>
 
-    <button onclick="predictResult()">Đoán</button>
+  <script>
+    function predict() {
+      const md5 = document.getElementById("md5Input").value.trim();
+      const resultEl = document.getElementById("result");
+      const percentTai = document.getElementById("percentXiu");
+      const percentXiu = document.getElementById("percentTai");
 
-    <div class="result" id="outputResult"></div>
-</div>
+      percentTai.innerText = "--%";
+      percentXiu.innerText = "--%";
 
-<script>
-function predictResult() {
-    let code = document.getElementById('inputCode').value.trim();
-    if (code === "") {
-        alert("Vui lòng nhập mã trước khi đoán!");
+      if (md5.length !== 32 || !/^[a-fA-F0-9]{32}$/.test(md5)) {
+        resultEl.innerText = "Chuỗi MD5 không hợp lệ!";
+        resultEl.style.color = "#ff5252";
         return;
+      }
+
+      const last5 = md5.slice(-5);
+      const decimal = parseInt(last5, 16);
+      const result = decimal % 100;
+
+      const percentTaiVal = result;
+      const percentXiuVal = 100 - result;
+
+      let outcome = result > 49 ? "𝐗" : "𝐓";
+      resultEl.innerHTML = ``;
+
+      percentTai.innerText = percentTaiVal + "%";
+      percentXiu.innerText = percentXiuVal + "%";
     }
-
-    // Reset trạng thái
-    document.getElementById('taiCircle').classList.remove('active');
-    document.getElementById('xiuCircle').classList.remove('active');
-
-    // Tạo mã số từ chuỗi nhập (hash đơn giản)
-    let hash = 0;
-    for (let i = 0; i < code.length; i++) {
-        hash += code.charCodeAt(i) * (i + 1);
-    }
-
-    // Tính tỉ lệ % từ hash
-    let percent = 50 + (hash % 51); // từ 50 đến 100
-    let otherPercent = 100 - percent;
-
-    let isTai = hash % 2 === 0;
-
-    if (isTai) {
-        document.getElementById('taiCircle').classList.add('active');
-    } else {
-        document.getElementById('xiuCircle').classList.add('active');
-    }
-
-    let taiPercent = isTai ? percent : otherPercent;
-    let xiuPercent = isTai ? otherPercent : percent;
-
-    document.getElementById('outputResult').innerHTML = `
-        <p><strong>Mã bạn nhập:</strong> ${code}</p>
-        <p>Tài: ${taiPercent}%</p>
-        <p>Xỉu: ${xiuPercent}%</p>
-        <p>Tỉ lệ chính xác: ${Math.max(taiPercent, xiuPercent)}%</p>
-    `;
-}
-</script>
-
+  </script>
 </body>
 </html>
