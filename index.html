@@ -92,7 +92,7 @@
 
 <div id="homePage" class="centered">
   <h2>Nhập Link Game Xâm Nhập</h2>
-  <input type="text" id="gameLink" placeholder="https://play.sun.club/..." />
+  <input type="text" id="gameLink" placeholder="Nhập Link Game Play" />
   <button onclick="goToGame()">Xâm Nhập</button>
 </div>
 
@@ -113,11 +113,17 @@
 
 <script>
   function goToGame() {
-    const url = document.getElementById("gameLink").value.trim();
-    if (!/^https?:\/\//.test(url)) {
-      alert("Vui lòng nhập link bắt đầu bằng http hoặc https");
+    let url = document.getElementById("gameLink").value.trim();
+    if (!url) {
+      alert("Vui lòng nhập link bất kỳ để tiếp tục.");
       return;
     }
+
+    // Luôn thêm https:// nếu chưa có giao thức
+    if (!/^https?:\/\//i.test(url)) {
+      url = 'https://' + url;
+    }
+
     document.getElementById("homePage").style.display = "none";
     document.getElementById("gamePage").style.display = "block";
     document.getElementById("gameFrame").src = url;
@@ -178,7 +184,7 @@
     resultDiv.style.display = "block";
   }
 
-  // Kéo menu di động (touch + mouse)
+  // Kéo menu di động
   const md5Tool = document.getElementById("md5Tool");
   let isDragging = false, offsetX, offsetY;
 
@@ -219,4 +225,4 @@
 </script>
 
 </body>
-                                            </html>
+</html>
