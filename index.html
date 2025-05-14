@@ -3,153 +3,220 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dự đoán Tài/Xỉu</title>
+  <title>Phân Tích MD5 - Tài/Xỉu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
-      padding: 0;
-      background-color: #121212;
-      color: #fff;
+      background-color: #000;
+      color: #00ff00;
+      font-family: 'Share Tech Mono', monospace;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .centered {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
-    }
-
-    .container {
-      text-align: center;
       padding: 20px;
-      max-width: 400px;
-      width: 100%;
-      background-color: #1e1e1e;
-      border-radius: 16px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
     }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      margin-top: 10px;
-      margin-bottom: 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      background-color: #2a2a2a;
-      color: #fff;
+    input, button {
+      background: #111;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 10px;
+      margin: 10px 0;
+      width: 90%;
+      max-width: 300px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      border-radius: 6px;
     }
-
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      background-color: #00c853;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
     button:hover {
-      background-color: #00e676;
+      background: #00ff00;
+      color: #000;
     }
-
-    #result {
-      margin-top: 20px;
-      font-size: 22px;
-      font-weight: bold;
+    iframe {
+      border: none;
+      width: 100%;
+      height: 100vh;
     }
-
-    .box-wrapper {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 30px;
-    }
-
-    .box {
-      width: 130px;
-      height: 130px;
-      border-radius: 20px;
-      background: linear-gradient(145deg, #1a1a1a, #262626);
-      box-shadow: 5px 5px 15px #0d0d0d, -5px -5px 15px #2e2e2e;
+    #controls {
+      position: fixed;
+      top: 10px;
+      right: 10px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      transition: transform 0.2s;
+      gap: 10px;
+      z-index: 9999;
     }
-
-    .box:hover {
-      transform: scale(1.05);
+    #controls button {
+      padding: 6px 10px;
+      font-size: 14px;
+      cursor: pointer;
     }
-
-    .box span.label {
-      font-size: 22px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #ffffff;
+    #exitBtn {
+      border-color: red;
+      color: red;
     }
-
-    .box span.percent {
-      font-size: 26px;
-      font-weight: bold;
-      color: #00e5ff;
+    #md5Tool {
+      position: fixed;
+      top: 60px;
+      right: 10px;
+      width: 320px;
+      background: #000;
+      border: 1px dashed #00ff00;
+      padding: 15px;
+      z-index: 9998;
+      display: none;
+      font-size: 14px;
+      line-height: 1.6;
     }
+    #md5Tool input,
+    #md5Tool button,
+    #md5Tool .result {
+      margin-bottom: 15px;
+      width: 100%;
+    }
+    .result {
+      white-space: pre-line;
+      color: #00ff00;
+    }
+    .high { color: #00e600; }
+    .warn { color: orange; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Dự đoán Tài/Xỉu</h2>
-    <input type="text" id="md5Input" placeholder="Nhập chuỗi MD5 tại đây">
-    <button onclick="predict()">Dự đoán</button>
-    <div id="result"></div>
 
-    <div class="box-wrapper">
-      <div class="box">
-        <span class="label">Tài</span>
-        <span class="percent" id="percentTai"></span>
-      </div>
-      <div class="box">
-        <span class="label">Xỉu</span>
-        <span class="percent" id="percentXiu"></span>
-      </div>
-    </div>
+<div id="homePage" class="centered">
+  <h2>Nhập Link Game Xâm Nhập</h2>
+  <input type="text" id="gameLink" placeholder="https://play.sun.club/..." />
+  <button onclick="goToGame()">Xâm Nhập</button>
+</div>
+
+<div id="gamePage" style="display: none;">
+  <div id="controls">
+    <button onclick="toggleMenu()">🔒Kích Hoạt</button>
+    <button id="exitBtn" onclick="exitGame()">🚪Thoát</button>
   </div>
 
-  <script>
-    function predict() {
-      const md5 = document.getElementById("md5Input").value.trim();
-      const resultEl = document.getElementById("result");
-      const percentTai = document.getElementById("percentXiu");
-      const percentXiu = document.getElementById("percentTai");
+  <iframe id="gameFrame" src=""></iframe>
 
-      percentTai.innerText = "--%";
-      percentXiu.innerText = "--%";
+  <div id="md5Tool">
+    <input type="text" id="md5Input" placeholder="Nhập MD5..." />
+    <button onclick="giaiMaMD5()">Xác Nhận</button>
+    <div id="ketQua" class="result"></div>
+  </div>
+</div>
 
-      if (md5.length !== 32 || !/^[a-fA-F0-9]{32}$/.test(md5)) {
-        resultEl.innerText = "Chuỗi MD5 không hợp lệ!";
-        resultEl.style.color = "#ff5252";
-        return;
-      }
-
-      const last5 = md5.slice(-5);
-      const decimal = parseInt(last5, 16);
-      const result = decimal % 100;
-
-      const percentTaiVal = result;
-      const percentXiuVal = 100 - result;
-
-      let outcome = result > 49 ? "𝐗" : "𝐓";
-      resultEl.innerHTML = ``;
-
-      percentTai.innerText = percentTaiVal + "%";
-      percentXiu.innerText = percentXiuVal + "%";
+<script>
+  function goToGame() {
+    const url = document.getElementById("gameLink").value.trim();
+    if (!/^https?:\/\//.test(url)) {
+      alert("Vui lòng nhập link bắt đầu bằng http hoặc https");
+      return;
     }
-  </script>
+    document.getElementById("homePage").style.display = "none";
+    document.getElementById("gamePage").style.display = "block";
+    document.getElementById("gameFrame").src = url;
+  }
+
+  function toggleMenu() {
+    const menu = document.getElementById("md5Tool");
+    menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
+  }
+
+  function exitGame() {
+    document.getElementById("gameFrame").src = "";
+    document.getElementById("gamePage").style.display = "none";
+    document.getElementById("homePage").style.display = "flex";
+  }
+
+  function giaiMaMD5() {
+    const md5 = document.getElementById("md5Input").value.trim().toLowerCase();
+    const resultDiv = document.getElementById("ketQua");
+
+    if (!/^[a-f0-9]{32}$/.test(md5)) {
+      resultDiv.innerHTML = "Chuỗi MD5 không hợp lệ!";
+      resultDiv.style.display = "block";
+      return;
+    }
+
+    const bin = BigInt('0x' + md5).toString(2).padStart(128, '0');
+    const bitOutcome = bin.endsWith("0") ? "TÀI" : "XỈU";
+
+    let xor = 0;
+    for (let i = 0; i < md5.length; i += 2) {
+      xor ^= parseInt(md5.substr(i, 2), 16);
+    }
+    const xorOutcome = (xor % 2 === 0) ? "TÀI" : "XỈU";
+
+    const rawVal = parseInt(md5.substring(0, 5), 16);
+    const rawOutcome = (rawVal % 2 === 0) ? "TÀI" : "XỈU";
+
+    const uniqueChars = new Set(md5.split('')).size;
+    const entVal = uniqueChars / 16 * 4;
+
+    const outcomes = [bitOutcome, xorOutcome, rawOutcome];
+    const final = outcomes.filter(v => v === "TÀI").length >= 2 ? "TÀI" : "XỈU";
+
+    let reliability = 0;
+    if (bitOutcome === final) reliability += 40;
+    if (xorOutcome === final) reliability += 40;
+    if (rawOutcome === final) reliability += 20;
+    if (entVal >= 3.5) reliability -= 10;
+    reliability = Math.max(0, Math.min(100, reliability));
+
+    let message = `<b>🔸MD5 :</b><br>${md5}<br><b>🔹Kết Quả :</b> ${final}<br><b>🔻Độ tin cậy:</b> ${reliability}%<br>`;
+    message += (reliability >= 65)
+      ? `<span class="high">✅ Tỉ lệ cao nên đánh theo</span>`
+      : `<span class="warn">⚠️ Không nên đánh này !</span>`;
+
+    resultDiv.innerHTML = message;
+    resultDiv.style.display = "block";
+  }
+
+  // Kéo menu di động (touch + mouse)
+  const md5Tool = document.getElementById("md5Tool");
+  let isDragging = false, offsetX, offsetY;
+
+  md5Tool.addEventListener("mousedown", (e) => startDrag(e));
+  md5Tool.addEventListener("touchstart", (e) => startDrag(e.touches[0]), { passive: false });
+
+  function startDrag(e) {
+    isDragging = true;
+    offsetX = e.clientX - md5Tool.offsetLeft;
+    offsetY = e.clientY - md5Tool.offsetTop;
+    document.addEventListener("mousemove", dragMove);
+    document.addEventListener("mouseup", stopDrag);
+    document.addEventListener("touchmove", dragTouch, { passive: false });
+    document.addEventListener("touchend", stopDrag);
+  }
+
+  function dragMove(e) {
+    if (!isDragging) return;
+    md5Tool.style.left = (e.clientX - offsetX) + "px";
+    md5Tool.style.top = (e.clientY - offsetY) + "px";
+  }
+
+  function dragTouch(e) {
+    if (!isDragging) return;
+    let touch = e.touches[0];
+    md5Tool.style.left = (touch.clientX - offsetX) + "px";
+    md5Tool.style.top = (touch.clientY - offsetY) + "px";
+    e.preventDefault();
+  }
+
+  function stopDrag() {
+    isDragging = false;
+    document.removeEventListener("mousemove", dragMove);
+    document.removeEventListener("mouseup", stopDrag);
+    document.removeEventListener("touchmove", dragTouch);
+    document.removeEventListener("touchend", stopDrag);
+  }
+</script>
+
 </body>
-</html>
+                                            </html>
